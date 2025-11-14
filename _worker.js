@@ -497,43 +497,41 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 						}
 						
 						:root {
-							--glass-bg: rgba(255, 255, 255, 0.1);
-							--glass-border: rgba(255, 255, 255, 0.18);
-							--glass-shadow: rgba(0, 0, 0, 0.1);
-							--primary-color: #007AFF;
-							--success-color: #34C759;
-							--warning-color: #FF9500;
-							--danger-color: #FF3B30;
+							--primary-color: #3B82F6;
+							--success-color: #10B981;
+							--warning-color: #F59E0B;
+							--danger-color: #EF4444;
 						}
 						
 						body {
 							font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-							background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+							background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 50%, #1a202c 100%);
 							min-height: 100vh;
 							padding: 20px;
 							overflow-x: hidden;
 						}
 						
-						/* 动态背景 */
+						/* 柔和的背景光晕 */
 						body::before {
 							content: '';
 							position: fixed;
-							top: 0;
-							left: 0;
-							right: 0;
-							bottom: 0;
+							top: -50%;
+							left: -50%;
+							width: 200%;
+							height: 200%;
 							background: 
-								radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-								radial-gradient(circle at 80% 80%, rgba(138, 73, 244, 0.3) 0%, transparent 50%),
-								radial-gradient(circle at 40% 20%, rgba(255, 95, 109, 0.3) 0%, transparent 50%);
-							animation: gradientShift 15s ease infinite;
+								radial-gradient(circle at 30% 40%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+								radial-gradient(circle at 70% 60%, rgba(99, 102, 241, 0.06) 0%, transparent 40%),
+								radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+							animation: gentleFloat 20s ease-in-out infinite;
 							pointer-events: none;
 							z-index: 0;
 						}
 						
-						@keyframes gradientShift {
-							0%, 100% { opacity: 1; transform: scale(1); }
-							50% { opacity: 0.8; transform: scale(1.1); }
+						@keyframes gentleFloat {
+							0%, 100% { transform: translate(0, 0) scale(1); }
+							33% { transform: translate(-20px, 20px) scale(1.05); }
+							66% { transform: translate(20px, -20px) scale(0.95); }
 						}
 						
 						.container {
@@ -543,16 +541,16 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 							z-index: 1;
 						}
 						
-						/* 玻璃态卡片 */
+						/* 玻璃态卡片 - 更柔和 */
 						.glass-card {
-							background: rgba(255, 255, 255, 0.08);
+							background: rgba(30, 41, 59, 0.6);
 							backdrop-filter: blur(20px) saturate(180%);
 							-webkit-backdrop-filter: blur(20px) saturate(180%);
 							border-radius: 24px;
-							border: 1px solid rgba(255, 255, 255, 0.18);
+							border: 1px solid rgba(148, 163, 184, 0.1);
 							box-shadow: 
-								0 8px 32px 0 rgba(0, 0, 0, 0.15),
-								inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+								0 8px 32px 0 rgba(0, 0, 0, 0.2),
+								inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
 							padding: 32px;
 							margin-bottom: 24px;
 							animation: fadeInUp 0.6s ease-out;
@@ -578,7 +576,7 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 						.header h1 {
 							font-size: 42px;
 							font-weight: 700;
-							background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%);
+							background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
 							-webkit-background-clip: text;
 							-webkit-text-fill-color: transparent;
 							background-clip: text;
@@ -587,7 +585,7 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 						}
 						
 						.header p {
-							color: rgba(255, 255, 255, 0.8);
+							color: #94a3b8;
 							font-size: 16px;
 							font-weight: 400;
 						}
@@ -595,7 +593,7 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 						.section-title {
 							font-size: 22px;
 							font-weight: 600;
-							color: white;
+							color: #e2e8f0;
 							margin-bottom: 20px;
 							display: flex;
 							align-items: center;
@@ -606,32 +604,32 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 							content: '';
 							width: 4px;
 							height: 24px;
-							background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.5) 100%);
+							background: linear-gradient(180deg, #3B82F6 0%, #2563EB 100%);
 							border-radius: 2px;
 						}
 						
 						/* 订阅链接卡片 */
 						.sub-item {
-							background: rgba(255, 255, 255, 0.06);
+							background: rgba(51, 65, 85, 0.4);
 							backdrop-filter: blur(10px);
 							border-radius: 16px;
 							padding: 20px;
 							margin-bottom: 16px;
-							border: 1px solid rgba(255, 255, 255, 0.12);
+							border: 1px solid rgba(148, 163, 184, 0.08);
 							transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 							animation: fadeInUp 0.6s ease-out calc(var(--index) * 0.05s) both;
 						}
 						
 						.sub-item:hover {
 							transform: translateY(-4px);
-							background: rgba(255, 255, 255, 0.1);
-							box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+							background: rgba(51, 65, 85, 0.6);
+							box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
 						}
 						
 						.sub-label {
 							font-size: 14px;
 							font-weight: 600;
-							color: rgba(255, 255, 255, 0.9);
+							color: #cbd5e1;
 							margin-bottom: 8px;
 							display: flex;
 							align-items: center;
@@ -640,7 +638,7 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 						
 						.sub-label::before {
 							content: '●';
-							color: #34C759;
+							color: #10B981;
 							font-size: 12px;
 						}
 						
@@ -648,16 +646,16 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 							display: flex;
 							align-items: center;
 							gap: 12px;
-							background: rgba(0, 0, 0, 0.2);
+							background: rgba(15, 23, 42, 0.5);
 							padding: 12px 16px;
 							border-radius: 12px;
-							border: 1px solid rgba(255, 255, 255, 0.08);
+							border: 1px solid rgba(148, 163, 184, 0.06);
 							margin-bottom: 12px;
 						}
 						
 						.sub-link a {
 							flex: 1;
-							color: rgba(255, 255, 255, 0.95);
+							color: #94a3b8;
 							text-decoration: none;
 							font-size: 13px;
 							word-break: break-all;
@@ -666,7 +664,7 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 						}
 						
 						.sub-link a:hover {
-							color: #fff;
+							color: #cbd5e1;
 						}
 						
 						/* 现代按钮 */
@@ -691,7 +689,7 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 							width: 0;
 							height: 0;
 							border-radius: 50%;
-							background: rgba(255, 255, 255, 0.2);
+							background: rgba(255, 255, 255, 0.15);
 							transform: translate(-50%, -50%);
 							transition: width 0.6s, height 0.6s;
 						}
@@ -702,31 +700,32 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 						}
 						
 						.btn-primary {
-							background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+							background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
 							color: white;
-							box-shadow: 0 4px 15px rgba(0, 122, 255, 0.4);
+							box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 						}
 						
 						.btn-primary:hover {
 							transform: translateY(-2px);
-							box-shadow: 0 6px 20px rgba(0, 122, 255, 0.5);
+							box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 						}
 						
 						.btn-copy {
-							background: rgba(255, 255, 255, 0.15);
-							color: white;
+							background: rgba(71, 85, 105, 0.6);
+							color: #e2e8f0;
 							padding: 8px 16px;
 							font-size: 13px;
 							flex-shrink: 0;
+							border: 1px solid rgba(148, 163, 184, 0.1);
 						}
 						
 						.btn-copy:hover {
-							background: rgba(255, 255, 255, 0.25);
+							background: rgba(71, 85, 105, 0.8);
 							transform: scale(1.05);
 						}
 						
 						.btn-success {
-							background: linear-gradient(135deg, #34C759 0%, #30A14E 100%);
+							background: linear-gradient(135deg, #10B981 0%, #059669 100%);
 							color: white;
 						}
 						
@@ -737,7 +736,7 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 							background: white;
 							border-radius: 12px;
 							display: inline-block;
-							box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+							box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 						}
 						
 						/* 文本编辑器 */
@@ -745,11 +744,11 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 							width: 100%;
 							min-height: 350px;
 							padding: 20px;
-							background: rgba(0, 0, 0, 0.3);
+							background: rgba(15, 23, 42, 0.6);
 							backdrop-filter: blur(10px);
-							border: 1px solid rgba(255, 255, 255, 0.15);
+							border: 1px solid rgba(148, 163, 184, 0.1);
 							border-radius: 16px;
-							color: #fff;
+							color: #cbd5e1;
 							font-size: 14px;
 							font-family: 'SF Mono', Monaco, Consolas, monospace;
 							line-height: 1.6;
@@ -759,19 +758,19 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 						
 						.editor:focus {
 							outline: none;
-							border-color: rgba(0, 122, 255, 0.6);
-							box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
-							background: rgba(0, 0, 0, 0.4);
+							border-color: rgba(59, 130, 246, 0.4);
+							box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+							background: rgba(15, 23, 42, 0.8);
 						}
 						
 						.editor::placeholder {
-							color: rgba(255, 255, 255, 0.4);
+							color: #64748b;
 						}
 						
 						/* 信息框 */
 						.info-box {
-							background: rgba(0, 122, 255, 0.15);
-							border-left: 4px solid #007AFF;
+							background: rgba(59, 130, 246, 0.1);
+							border-left: 4px solid #3B82F6;
 							padding: 16px 20px;
 							border-radius: 12px;
 							margin: 16px 0;
@@ -779,13 +778,13 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 						}
 						
 						.info-box p {
-							color: rgba(255, 255, 255, 0.9);
+							color: #cbd5e1;
 							margin: 6px 0;
 							font-size: 14px;
 						}
 						
 						.info-box strong {
-							color: white;
+							color: #e2e8f0;
 							font-weight: 600;
 						}
 						
@@ -798,7 +797,7 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 						}
 						
 						.save-status {
-							color: rgba(255, 255, 255, 0.8);
+							color: #94a3b8;
 							font-size: 14px;
 							font-weight: 500;
 						}
@@ -809,7 +808,7 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 						}
 						
 						.collapse-toggle {
-							color: #007AFF;
+							color: #3B82F6;
 							cursor: pointer;
 							font-weight: 600;
 							font-size: 15px;
@@ -817,22 +816,23 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 							align-items: center;
 							gap: 8px;
 							padding: 10px 16px;
-							background: rgba(0, 122, 255, 0.1);
+							background: rgba(59, 130, 246, 0.1);
 							border-radius: 10px;
 							transition: all 0.3s;
+							border: 1px solid rgba(59, 130, 246, 0.15);
 						}
 						
 						.collapse-toggle:hover {
-							background: rgba(0, 122, 255, 0.2);
+							background: rgba(59, 130, 246, 0.15);
 							transform: translateX(4px);
 						}
 						
 						.collapse-content {
 							margin-top: 20px;
 							padding: 24px;
-							background: rgba(0, 0, 0, 0.2);
+							background: rgba(15, 23, 42, 0.4);
 							border-radius: 16px;
-							border: 1px solid rgba(255, 255, 255, 0.1);
+							border: 1px solid rgba(148, 163, 184, 0.08);
 							animation: slideDown 0.3s ease-out;
 						}
 						
@@ -849,12 +849,12 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 						
 						/* 警告提示 */
 						.warning {
-							color: #FF9500;
+							color: #FCD34D;
 							font-weight: 600;
 							padding: 12px 16px;
-							background: rgba(255, 149, 0, 0.15);
+							background: rgba(245, 158, 11, 0.1);
 							border-radius: 10px;
-							border-left: 4px solid #FF9500;
+							border-left: 4px solid #F59E0B;
 							margin-bottom: 16px;
 							display: flex;
 							align-items: center;
@@ -916,7 +916,7 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 
 						<div class="glass-card">
 							<div class="section-title">📱 订阅地址</div>
-							<p style="color: rgba(255,255,255,0.7); margin-bottom: 24px; font-size: 14px;">点击复制按钮即可复制订阅链接并生成二维码</p>
+							<p style="color: #94a3b8; margin-bottom: 24px; font-size: 14px;">点击复制按钮即可复制订阅链接并生成二维码</p>
 							
 							<div class="sub-item" style="--index: 0;">
 								<div class="sub-label">自适应订阅</div>
@@ -1074,7 +1074,6 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 					<script>
 					function copyToClipboard(text, qrId) {
 						navigator.clipboard.writeText(text).then(() => {
-							// 显示复制成功提示
 							const btn = event.target;
 							const originalText = btn.innerHTML;
 							btn.innerHTML = '✓ 已复制';
@@ -1086,7 +1085,6 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 								btn.classList.add('btn-copy');
 							}, 2000);
 							
-							// 生成二维码
 							const qrDiv = document.getElementById(qrId);
 							qrDiv.innerHTML = '';
 							const wrapper = document.createElement('div');
@@ -1146,7 +1144,7 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 							const statusElem = document.getElementById('saveStatus');
 							if (statusElem) {
 								statusElem.textContent = message;
-								statusElem.style.color = isError ? '#FF3B30' : '#34C759';
+								statusElem.style.color = isError ? '#EF4444' : '#10B981';
 							}
 						};
 
