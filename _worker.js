@@ -47,7 +47,6 @@ export default {
 		guestToken = env.GUESTTOKEN || env.GUEST || guestToken;
 		if (!guestToken) guestToken = await MD5MD5(mytoken);
 		const 访客订阅 = guestToken;
-		//console.log(`${fakeUserID}\n${fakeHostName}`); // 打印fakeID
 
 		let UD = Math.floor(((timestamp - Date.now()) / timestamp * total * 1099511627776) / 2);
 		total = total * 1099511627776;
@@ -108,7 +107,6 @@ export default {
 
 			let subConverterUrl;
 			let 订阅转换URL = `${url.origin}/${await MD5MD5(fakeToken)}?token=${fakeToken}`;
-			//console.log(订阅转换URL);
 			let req_data = MainData;
 
 			let 追加UA = 'v2rayn';
@@ -119,7 +117,7 @@ export default {
 			else if (url.searchParams.has('quanx')) 追加UA = 'Quantumult%20X';
 			else if (url.searchParams.has('loon')) 追加UA = 'Loon';
 
-			const 订阅链接数组 = [...new Set(urls)].filter(item => item?.trim?.()); // 去重
+			const 订阅链接数组 = [...new Set(urls)].filter(item => item?.trim?.());
 			if (订阅链接数组.length > 0) {
 				const 请求订阅响应内容 = await getSUB(订阅链接数组, request, 追加UA, userAgentHeader);
 				console.log(请求订阅响应内容);
@@ -140,17 +138,13 @@ export default {
 			}
 
 			if (env.WARP) 订阅转换URL += "|" + (await ADD(env.WARP)).join("|");
-			//修复中文错误
 			const utf8Encoder = new TextEncoder();
 			const encodedData = utf8Encoder.encode(req_data);
-			//const text = String.fromCharCode.apply(null, encodedData);
 			const utf8Decoder = new TextDecoder();
 			const text = utf8Decoder.decode(encodedData);
 
-			//去重
 			const uniqueLines = new Set(text.split('\n'));
 			const result = [...uniqueLines].join('\n');
-			//console.log(result);
 
 			let base64Data;
 			try {
@@ -179,12 +173,10 @@ export default {
 				base64Data = encodeBase64(result)
 			}
 
-			// 构建响应头对象
 			const responseHeaders = {
 				"content-type": "text/plain; charset=utf-8",
 				"Profile-Update-Interval": `${SUBUpdateTime}`,
 				"Profile-web-page-url": request.url.includes('?') ? request.url.split('?')[0] : request.url,
-				//"Subscription-Userinfo": `upload=${UD}; download=${UD}; total=${total}; expire=${expire}`,
 			};
 
 			if (订阅格式 == 'base64' || token == fakeToken) {
@@ -200,13 +192,11 @@ export default {
 			} else if (订阅格式 == 'loon') {
 				subConverterUrl = `${subProtocol}://${subConverter}/sub?target=loon&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false`;
 			}
-			//console.log(订阅转换URL);
 			try {
-				const subConverterResponse = await fetch(subConverterUrl, { headers: { 'User-Agent': userAgentHeader } });//订阅转换
+				const subConverterResponse = await fetch(subConverterUrl, { headers: { 'User-Agent': userAgentHeader } });
 				if (!subConverterResponse.ok) return new Response(base64Data, { headers: responseHeaders });
 				let subConverterContent = await subConverterResponse.text();
 				if (订阅格式 == 'clash') subConverterContent = await clashFix(subConverterContent);
-				// 只有非浏览器订阅才会返回SUBNAME
 				if (!userAgent.includes('mozilla')) responseHeaders["Content-Disposition"] = `attachment; filename*=utf-8''${encodeURIComponent(FileName)}`;
 				return new Response(subConverterContent, { headers: responseHeaders });
 			} catch (error) {
@@ -217,12 +207,10 @@ export default {
 };
 
 async function ADD(envadd) {
-	var addtext = envadd.replace(/[	"'|\r\n]+/g, '\n').replace(/\n+/g, '\n');	// 替换为换行
-	//console.log(addtext);
+	var addtext = envadd.replace(/[	"'|\r\n]+/g, '\n').replace(/\n+/g, '\n');
 	if (addtext.charAt(0) == '\n') addtext = addtext.slice(1);
 	if (addtext.charAt(addtext.length - 1) == '\n') addtext = addtext.slice(0, addtext.length - 1);
 	const add = addtext.split('\n');
-	//console.log(add);
 	return add;
 }
 
@@ -329,37 +317,28 @@ async function proxyURL(proxyURL, url) {
 	const URLs = await ADD(proxyURL);
 	const fullURL = URLs[Math.floor(Math.random() * URLs.length)];
 
-	// 解析目标 URL
 	let parsedURL = new URL(fullURL);
 	console.log(parsedURL);
-	// 提取并可能修改 URL 组件
 	let URLProtocol = parsedURL.protocol.slice(0, -1) || 'https';
 	let URLHostname = parsedURL.hostname;
 	let URLPathname = parsedURL.pathname;
 	let URLSearch = parsedURL.search;
 
-	// 处理 pathname
 	if (URLPathname.charAt(URLPathname.length - 1) == '/') {
 		URLPathname = URLPathname.slice(0, -1);
 	}
 	URLPathname += url.pathname;
 
-	// 构建新的 URL
 	let newURL = `${URLProtocol}://${URLHostname}${URLPathname}${URLSearch}`;
 
-	// 反向代理请求
 	let response = await fetch(newURL);
 
-	// 创建新的响应
 	let newResponse = new Response(response.body, {
 		status: response.status,
 		statusText: response.statusText,
 		headers: response.headers
 	});
 
-	// 添加自定义头部，包含 URL 信息
-	//newResponse.headers.set('X-Proxied-By', 'Cloudflare Worker');
-	//newResponse.headers.set('X-Original-URL', fullURL);
 	newResponse.headers.set('X-New-URL', newURL);
 
 	return newResponse;
@@ -368,63 +347,55 @@ async function proxyURL(proxyURL, url) {
 async function getSUB(api, request, 追加UA, userAgentHeader) {
 	if (!api || api.length === 0) {
 		return [];
-	} else api = [...new Set(api)]; // 去重
+	} else api = [...new Set(api)];
 	let newapi = "";
 	let 订阅转换URLs = "";
 	let 异常订阅 = "";
-	const controller = new AbortController(); // 创建一个AbortController实例，用于取消请求
+	const controller = new AbortController();
 	const timeout = setTimeout(() => {
-		controller.abort(); // 2秒后取消所有请求
+		controller.abort();
 	}, 2000);
 
 	try {
-		// 使用Promise.allSettled等待所有API请求完成，无论成功或失败
 		const responses = await Promise.allSettled(api.map(apiUrl => getUrl(request, apiUrl, 追加UA, userAgentHeader).then(response => response.ok ? response.text() : Promise.reject(response))));
 
-		// 遍历所有响应
 		const modifiedResponses = responses.map((response, index) => {
-			// 检查是否请求成功
 			if (response.status === 'rejected') {
 				const reason = response.reason;
 				if (reason && reason.name === 'AbortError') {
 					return {
 						status: '超时',
 						value: null,
-						apiUrl: api[index] // 将原始的apiUrl添加到返回对象中
+						apiUrl: api[index]
 					};
 				}
 				console.error(`请求失败: ${api[index]}, 错误信息: ${reason.status} ${reason.statusText}`);
 				return {
 					status: '请求失败',
 					value: null,
-					apiUrl: api[index] // 将原始的apiUrl添加到返回对象中
+					apiUrl: api[index]
 				};
 			}
 			return {
 				status: response.status,
 				value: response.value,
-				apiUrl: api[index] // 将原始的apiUrl添加到返回对象中
+				apiUrl: api[index]
 			};
 		});
 
-		console.log(modifiedResponses); // 输出修改后的响应数组
+		console.log(modifiedResponses);
 
 		for (const response of modifiedResponses) {
-			// 检查响应状态是否为'fulfilled'
 			if (response.status === 'fulfilled') {
-				const content = await response.value || 'null'; // 获取响应的内容
+				const content = await response.value || 'null';
 				if (content.includes('proxies:')) {
-					//console.log('Clash订阅: ' + response.apiUrl);
-					订阅转换URLs += "|" + response.apiUrl; // Clash 配置
+					订阅转换URLs += "|" + response.apiUrl;
 				} else if (content.includes('outbounds"') && content.includes('inbounds"')) {
-					//console.log('Singbox订阅: ' + response.apiUrl);
-					订阅转换URLs += "|" + response.apiUrl; // Singbox 配置
+					订阅转换URLs += "|" + response.apiUrl;
 				} else if (content.includes('://')) {
-					//console.log('明文订阅: ' + response.apiUrl);
-					newapi += content + '\n'; // 追加内容
+					newapi += content + '\n';
 				} else if (isValidBase64(content)) {
-					//console.log('Base64订阅: ' + response.apiUrl);
-					newapi += base64Decode(content) + '\n'; // 解码并追加内容
+					newapi += base64Decode(content) + '\n';
 				} else {
 					const 异常订阅LINK = `trojan://CMLiussss@127.0.0.1:8888?security=tls&allowInsecure=1&type=tcp&headerType=none#%E5%BC%82%E5%B8%B8%E8%AE%A2%E9%98%85%20${response.apiUrl.split('://')[1].split('/')[0]}`;
 					console.log('异常订阅: ' + 异常订阅LINK);
@@ -433,49 +404,40 @@ async function getSUB(api, request, 追加UA, userAgentHeader) {
 			}
 		}
 	} catch (error) {
-		console.error(error); // 捕获并输出错误信息
+		console.error(error);
 	} finally {
-		clearTimeout(timeout); // 清除定时器
+		clearTimeout(timeout);
 	}
 
-	const 订阅内容 = await ADD(newapi + 异常订阅); // 将处理后的内容转换为数组
-	// 返回处理后的结果
+	const 订阅内容 = await ADD(newapi + 异常订阅);
 	return [订阅内容, 订阅转换URLs];
 }
 
 async function getUrl(request, targetUrl, 追加UA, userAgentHeader) {
-	// 设置自定义 User-Agent
 	const newHeaders = new Headers(request.headers);
 	newHeaders.set("User-Agent", `${atob('djJyYXlOLzYuNDU=')} cmliu/CF-Workers-SUB ${追加UA}(${userAgentHeader})`);
 
-	// 构建新的请求对象
 	const modifiedRequest = new Request(targetUrl, {
 		method: request.method,
 		headers: newHeaders,
 		body: request.method === "GET" ? null : request.body,
 		redirect: "follow",
 		cf: {
-			// 忽略SSL证书验证
 			insecureSkipVerify: true,
-			// 允许自签名证书
 			allowUntrusted: true,
-			// 禁用证书验证
 			validateCertificate: false
 		}
 	});
 
-	// 输出请求的详细信息
 	console.log(`请求URL: ${targetUrl}`);
 	console.log(`请求头: ${JSON.stringify([...newHeaders])}`);
 	console.log(`请求方法: ${request.method}`);
 	console.log(`请求体: ${request.method === "GET" ? null : request.body}`);
 
-	// 发送请求并返回响应
 	return fetch(modifiedRequest);
 }
 
 function isValidBase64(str) {
-	// 先移除所有空白字符(空格、换行、回车等)
 	const cleanStr = str.replace(/\s/g, '');
 	const base64Regex = /^[A-Za-z0-9+/=]+$/;
 	return base64Regex.test(cleanStr);
@@ -486,9 +448,7 @@ async function 迁移地址列表(env, txt = 'ADD.txt') {
 	const 新数据 = await env.KV.get(txt);
 
 	if (旧数据 && !新数据) {
-		// 写入新位置
 		await env.KV.put(txt, 旧数据);
-		// 删除旧数据
 		await env.KV.delete(`/${txt}`);
 		return true;
 	}
@@ -498,7 +458,6 @@ async function 迁移地址列表(env, txt = 'ADD.txt') {
 async function KV(request, env, txt = 'ADD.txt', guest) {
 	const url = new URL(request.url);
 	try {
-		// POST请求处理
 		if (request.method === "POST") {
 			if (!env.KV) return new Response("未绑定KV空间", { status: 400 });
 			try {
@@ -511,7 +470,6 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 			}
 		}
 
-		// GET请求部分
 		let content = '';
 		let hasKV = !!env.KV;
 
@@ -526,281 +484,716 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 
 		const html = `
 			<!DOCTYPE html>
-			<html>
+			<html lang="zh-CN">
 				<head>
-					<title>${FileName} 订阅编辑</title>
+					<title>${FileName} 订阅管理</title>
 					<meta charset="utf-8">
-					<meta name="viewport" content="width=device-width, initial-scale=1">
+					<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 					<style>
-						body {
+						* {
 							margin: 0;
-							padding: 15px;
+							padding: 0;
 							box-sizing: border-box;
-							font-size: 13px;
 						}
-						.editor-container {
-							width: 100%;
-							max-width: 100%;
+						
+						:root {
+							--glass-bg: rgba(255, 255, 255, 0.1);
+							--glass-border: rgba(255, 255, 255, 0.18);
+							--glass-shadow: rgba(0, 0, 0, 0.1);
+							--primary-color: #007AFF;
+							--success-color: #34C759;
+							--warning-color: #FF9500;
+							--danger-color: #FF3B30;
+						}
+						
+						body {
+							font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+							background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+							min-height: 100vh;
+							padding: 20px;
+							overflow-x: hidden;
+						}
+						
+						/* 动态背景 */
+						body::before {
+							content: '';
+							position: fixed;
+							top: 0;
+							left: 0;
+							right: 0;
+							bottom: 0;
+							background: 
+								radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+								radial-gradient(circle at 80% 80%, rgba(138, 73, 244, 0.3) 0%, transparent 50%),
+								radial-gradient(circle at 40% 20%, rgba(255, 95, 109, 0.3) 0%, transparent 50%);
+							animation: gradientShift 15s ease infinite;
+							pointer-events: none;
+							z-index: 0;
+						}
+						
+						@keyframes gradientShift {
+							0%, 100% { opacity: 1; transform: scale(1); }
+							50% { opacity: 0.8; transform: scale(1.1); }
+						}
+						
+						.container {
+							max-width: 1000px;
 							margin: 0 auto;
+							position: relative;
+							z-index: 1;
 						}
-						.editor {
-							width: 100%;
-							height: 300px;
-							margin: 15px 0;
-							padding: 10px;
-							box-sizing: border-box;
-							border: 1px solid #ccc;
-							border-radius: 4px;
-							font-size: 13px;
-							line-height: 1.5;
-							overflow-y: auto;
-							resize: none;
+						
+						/* 玻璃态卡片 */
+						.glass-card {
+							background: rgba(255, 255, 255, 0.08);
+							backdrop-filter: blur(20px) saturate(180%);
+							-webkit-backdrop-filter: blur(20px) saturate(180%);
+							border-radius: 24px;
+							border: 1px solid rgba(255, 255, 255, 0.18);
+							box-shadow: 
+								0 8px 32px 0 rgba(0, 0, 0, 0.15),
+								inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+							padding: 32px;
+							margin-bottom: 24px;
+							animation: fadeInUp 0.6s ease-out;
 						}
-						.save-container {
-							margin-top: 8px;
+						
+						@keyframes fadeInUp {
+							from {
+								opacity: 0;
+								transform: translateY(30px);
+							}
+							to {
+								opacity: 1;
+								transform: translateY(0);
+							}
+						}
+						
+						.header {
+							text-align: center;
+							margin-bottom: 40px;
+							animation: fadeInUp 0.6s ease-out 0.1s both;
+						}
+						
+						.header h1 {
+							font-size: 42px;
+							font-weight: 700;
+							background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%);
+							-webkit-background-clip: text;
+							-webkit-text-fill-color: transparent;
+							background-clip: text;
+							margin-bottom: 12px;
+							letter-spacing: -0.5px;
+						}
+						
+						.header p {
+							color: rgba(255, 255, 255, 0.8);
+							font-size: 16px;
+							font-weight: 400;
+						}
+						
+						.section-title {
+							font-size: 22px;
+							font-weight: 600;
+							color: white;
+							margin-bottom: 20px;
 							display: flex;
 							align-items: center;
 							gap: 10px;
 						}
-						.save-btn, .back-btn {
-							padding: 6px 15px;
-							color: white;
+						
+						.section-title::before {
+							content: '';
+							width: 4px;
+							height: 24px;
+							background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.5) 100%);
+							border-radius: 2px;
+						}
+						
+						/* 订阅链接卡片 */
+						.sub-item {
+							background: rgba(255, 255, 255, 0.06);
+							backdrop-filter: blur(10px);
+							border-radius: 16px;
+							padding: 20px;
+							margin-bottom: 16px;
+							border: 1px solid rgba(255, 255, 255, 0.12);
+							transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+							animation: fadeInUp 0.6s ease-out calc(var(--index) * 0.05s) both;
+						}
+						
+						.sub-item:hover {
+							transform: translateY(-4px);
+							background: rgba(255, 255, 255, 0.1);
+							box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+						}
+						
+						.sub-label {
+							font-size: 14px;
+							font-weight: 600;
+							color: rgba(255, 255, 255, 0.9);
+							margin-bottom: 8px;
+							display: flex;
+							align-items: center;
+							gap: 8px;
+						}
+						
+						.sub-label::before {
+							content: '●';
+							color: #34C759;
+							font-size: 12px;
+						}
+						
+						.sub-link {
+							display: flex;
+							align-items: center;
+							gap: 12px;
+							background: rgba(0, 0, 0, 0.2);
+							padding: 12px 16px;
+							border-radius: 12px;
+							border: 1px solid rgba(255, 255, 255, 0.08);
+							margin-bottom: 12px;
+						}
+						
+						.sub-link a {
+							flex: 1;
+							color: rgba(255, 255, 255, 0.95);
+							text-decoration: none;
+							font-size: 13px;
+							word-break: break-all;
+							font-family: 'SF Mono', Monaco, monospace;
+							transition: color 0.2s;
+						}
+						
+						.sub-link a:hover {
+							color: #fff;
+						}
+						
+						/* 现代按钮 */
+						.btn {
+							padding: 10px 20px;
+							border-radius: 12px;
 							border: none;
-							border-radius: 4px;
+							font-size: 14px;
+							font-weight: 600;
 							cursor: pointer;
+							transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+							backdrop-filter: blur(10px);
+							position: relative;
+							overflow: hidden;
 						}
-						.save-btn {
-							background: #4CAF50;
+						
+						.btn::before {
+							content: '';
+							position: absolute;
+							top: 50%;
+							left: 50%;
+							width: 0;
+							height: 0;
+							border-radius: 50%;
+							background: rgba(255, 255, 255, 0.2);
+							transform: translate(-50%, -50%);
+							transition: width 0.6s, height 0.6s;
 						}
-						.save-btn:hover {
-							background: #45a049;
+						
+						.btn:active::before {
+							width: 300px;
+							height: 300px;
 						}
-						.back-btn {
-							background: #666;
+						
+						.btn-primary {
+							background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+							color: white;
+							box-shadow: 0 4px 15px rgba(0, 122, 255, 0.4);
 						}
-						.back-btn:hover {
-							background: #555;
+						
+						.btn-primary:hover {
+							transform: translateY(-2px);
+							box-shadow: 0 6px 20px rgba(0, 122, 255, 0.5);
 						}
+						
+						.btn-copy {
+							background: rgba(255, 255, 255, 0.15);
+							color: white;
+							padding: 8px 16px;
+							font-size: 13px;
+							flex-shrink: 0;
+						}
+						
+						.btn-copy:hover {
+							background: rgba(255, 255, 255, 0.25);
+							transform: scale(1.05);
+						}
+						
+						.btn-success {
+							background: linear-gradient(135deg, #34C759 0%, #30A14E 100%);
+							color: white;
+						}
+						
+						/* 二维码容器 */
+						.qrcode-wrapper {
+							margin-top: 12px;
+							padding: 16px;
+							background: white;
+							border-radius: 12px;
+							display: inline-block;
+							box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+						}
+						
+						/* 文本编辑器 */
+						.editor {
+							width: 100%;
+							min-height: 350px;
+							padding: 20px;
+							background: rgba(0, 0, 0, 0.3);
+							backdrop-filter: blur(10px);
+							border: 1px solid rgba(255, 255, 255, 0.15);
+							border-radius: 16px;
+							color: #fff;
+							font-size: 14px;
+							font-family: 'SF Mono', Monaco, Consolas, monospace;
+							line-height: 1.6;
+							resize: vertical;
+							transition: all 0.3s;
+						}
+						
+						.editor:focus {
+							outline: none;
+							border-color: rgba(0, 122, 255, 0.6);
+							box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+							background: rgba(0, 0, 0, 0.4);
+						}
+						
+						.editor::placeholder {
+							color: rgba(255, 255, 255, 0.4);
+						}
+						
+						/* 信息框 */
+						.info-box {
+							background: rgba(0, 122, 255, 0.15);
+							border-left: 4px solid #007AFF;
+							padding: 16px 20px;
+							border-radius: 12px;
+							margin: 16px 0;
+							backdrop-filter: blur(10px);
+						}
+						
+						.info-box p {
+							color: rgba(255, 255, 255, 0.9);
+							margin: 6px 0;
+							font-size: 14px;
+						}
+						
+						.info-box strong {
+							color: white;
+							font-weight: 600;
+						}
+						
+						/* 保存状态 */
+						.save-container {
+							display: flex;
+							align-items: center;
+							gap: 16px;
+							margin-top: 16px;
+						}
+						
 						.save-status {
-							color: #666;
+							color: rgba(255, 255, 255, 0.8);
+							font-size: 14px;
+							font-weight: 500;
+						}
+						
+						/* 折叠区域 */
+						.collapsible {
+							margin-top: 24px;
+						}
+						
+						.collapse-toggle {
+							color: #007AFF;
+							cursor: pointer;
+							font-weight: 600;
+							font-size: 15px;
+							display: inline-flex;
+							align-items: center;
+							gap: 8px;
+							padding: 10px 16px;
+							background: rgba(0, 122, 255, 0.1);
+							border-radius: 10px;
+							transition: all 0.3s;
+						}
+						
+						.collapse-toggle:hover {
+							background: rgba(0, 122, 255, 0.2);
+							transform: translateX(4px);
+						}
+						
+						.collapse-content {
+							margin-top: 20px;
+							padding: 24px;
+							background: rgba(0, 0, 0, 0.2);
+							border-radius: 16px;
+							border: 1px solid rgba(255, 255, 255, 0.1);
+							animation: slideDown 0.3s ease-out;
+						}
+						
+						@keyframes slideDown {
+							from {
+								opacity: 0;
+								transform: translateY(-10px);
+							}
+							to {
+								opacity: 1;
+								transform: translateY(0);
+							}
+						}
+						
+						/* 警告提示 */
+						.warning {
+							color: #FF9500;
+							font-weight: 600;
+							padding: 12px 16px;
+							background: rgba(255, 149, 0, 0.15);
+							border-radius: 10px;
+							border-left: 4px solid #FF9500;
+							margin-bottom: 16px;
+							display: flex;
+							align-items: center;
+							gap: 10px;
+						}
+						
+						.warning::before {
+							content: '⚠️';
+							font-size: 18px;
+						}
+						
+						/* 响应式 */
+						@media (max-width: 768px) {
+							body {
+								padding: 12px;
+							}
+							
+							.glass-card {
+								padding: 20px;
+								border-radius: 20px;
+							}
+							
+							.header h1 {
+								font-size: 32px;
+							}
+							
+							.sub-link {
+								flex-direction: column;
+								align-items: stretch;
+							}
+							
+							.btn-copy {
+								width: 100%;
+							}
+						}
+						
+						/* 加载动画 */
+						@keyframes pulse {
+							0%, 100% {
+								opacity: 1;
+							}
+							50% {
+								opacity: 0.5;
+							}
+						}
+						
+						.loading {
+							animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 						}
 					</style>
 					<script src="https://cdn.jsdelivr.net/npm/@keeex/qrcodejs-kx@1.0.2/qrcode.min.js"></script>
 				</head>
 				<body>
-					################################################################<br>
-					Subscribe / sub 订阅地址, 点击链接自动 <strong>复制订阅链接</strong> 并 <strong>生成订阅二维码</strong> <br>
-					---------------------------------------------------------------<br>
-					自适应订阅地址:<br>
-					<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?sub','qrcode_0')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/${mytoken}</a><br>
-					<div id="qrcode_0" style="margin: 10px 10px 10px 10px;"></div>
-					Base64订阅地址:<br>
-					<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?b64','qrcode_1')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/${mytoken}?b64</a><br>
-					<div id="qrcode_1" style="margin: 10px 10px 10px 10px;"></div>
-					clash订阅地址:<br>
-					<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?clash','qrcode_2')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/${mytoken}?clash</a><br>
-					<div id="qrcode_2" style="margin: 10px 10px 10px 10px;"></div>
-					singbox订阅地址:<br>
-					<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?sb','qrcode_3')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/${mytoken}?sb</a><br>
-					<div id="qrcode_3" style="margin: 10px 10px 10px 10px;"></div>
-					surge订阅地址:<br>
-					<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?surge','qrcode_4')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/${mytoken}?surge</a><br>
-					<div id="qrcode_4" style="margin: 10px 10px 10px 10px;"></div>
-					loon订阅地址:<br>
-					<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?loon','qrcode_5')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/${mytoken}?loon</a><br>
-					<div id="qrcode_5" style="margin: 10px 10px 10px 10px;"></div>
-					&nbsp;&nbsp;<strong><a href="javascript:void(0);" id="noticeToggle" onclick="toggleNotice()">查看访客订阅∨</a></strong><br>
-					<div id="noticeContent" class="notice-content" style="display: none;">
-						---------------------------------------------------------------<br>
-						访客订阅只能使用订阅功能，无法查看配置页！<br>
-						GUEST（访客订阅TOKEN）: <strong>${guest}</strong><br>
-						---------------------------------------------------------------<br>
-						自适应订阅地址:<br>
-						<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}','guest_0')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/sub?token=${guest}</a><br>
-						<div id="guest_0" style="margin: 10px 10px 10px 10px;"></div>
-						Base64订阅地址:<br>
-						<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&b64','guest_1')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/sub?token=${guest}&b64</a><br>
-						<div id="guest_1" style="margin: 10px 10px 10px 10px;"></div>
-						clash订阅地址:<br>
-						<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&clash','guest_2')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/sub?token=${guest}&clash</a><br>
-						<div id="guest_2" style="margin: 10px 10px 10px 10px;"></div>
-						singbox订阅地址:<br>
-						<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&sb','guest_3')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/sub?token=${guest}&sb</a><br>
-						<div id="guest_3" style="margin: 10px 10px 10px 10px;"></div>
-						surge订阅地址:<br>
-						<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&surge','guest_4')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/sub?token=${guest}&surge</a><br>
-						<div id="guest_4" style="margin: 10px 10px 10px 10px;"></div>
-						loon订阅地址:<br>
-						<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&loon','guest_5')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/sub?token=${guest}&loon</a><br>
-						<div id="guest_5" style="margin: 10px 10px 10px 10px;"></div>
-					</div>
-					---------------------------------------------------------------<br>
-					################################################################<br>
-					订阅转换配置<br>
-					---------------------------------------------------------------<br>
-					SUBAPI（订阅转换后端）: <strong>${subProtocol}://${subConverter}</strong><br>
-					SUBCONFIG（订阅配置文件）: <strong>${subConfig}</strong><br>
-					---------------------------------------------------------------<br>
-					################################################################<br>
-					${FileName} 汇聚订阅编辑: 
-					<div class="editor-container">
-						${hasKV ? `
-						<textarea class="editor" 
-							placeholder="${decodeURIComponent(atob('TElOSyVFNyVBNCVCQSVFNCVCRSU4QiVFRiVCQyU4OCVFNCVCOCU4MCVFOCVBMSU4QyVFNCVCOCU4MCVFNCVCOCVBQSVFOCU4QSU4MiVFNyU4MiVCOSVFOSU5MyVCRSVFNiU4RSVBNSVFNSU4RCVCMyVFNSU4RiVBRiVFRiVCQyU4OSVFRiVCQyU5QQp2bGVzcyUzQSUyRiUyRjI0NmFhNzk1LTA2MzctNGY0Yy04ZjY0LTJjOGZiMjRjMWJhZCU0MDEyNy4wLjAuMSUzQTEyMzQlM0ZlbmNyeXB0aW9uJTNEbm9uZSUyNnNlY3VyaXR5JTNEdGxzJTI2c25pJTNEVEcuQ01MaXVzc3NzLmxvc2V5b3VyaXAuY29tJTI2YWxsb3dJbnNlY3VyZSUzRDElMjZ0eXBlJTNEd3MlMjZob3N0JTNEVEcuQ01MaXVzc3NzLmxvc2V5b3VyaXAuY29tJTI2cGF0aCUzRCUyNTJGJTI1M0ZlZCUyNTNEMjU2MCUyM0NGbmF0CnRyb2phbiUzQSUyRiUyRmFhNmRkZDJmLWQxY2YtNGE1Mi1iYTFiLTI2NDBjNDFhNzg1NiU0MDIxOC4xOTAuMjMwLjIwNyUzQTQxMjg4JTNGc2VjdXJpdHklM0R0bHMlMjZzbmklM0RoazEyLmJpbGliaWxpLmNvbSUyNmFsbG93SW5zZWN1cmUlM0QxJTI2dHlwZSUzRHRjcCUyNmhlYWRlclR5cGUlM0Rub25lJTIzSEsKc3MlM0ElMkYlMkZZMmhoWTJoaE1qQXRhV1YwWmkxd2IyeDVNVE13TlRveVJYUlFjVzQyU0ZscVZVNWpTRzlvVEdaVmNFWlJkMjVtYWtORFVUVnRhREZ0U21SRlRVTkNkV04xVjFvNVVERjFaR3RTUzBodVZuaDFielUxYXpGTFdIb3lSbTgyYW5KbmRERTRWelkyYjNCMGVURmxOR0p0TVdwNlprTm1RbUklMjUzRCU0MDg0LjE5LjMxLjYzJTNBNTA4NDElMjNERQoKCiVFOCVBRSVBMiVFOSU5OCU4NSVFOSU5MyVCRSVFNiU4RSVBNSVFNSU4RCVCMyVFNCVCRSU4QiVFRiVCQyU4OCVFNCVCOCU4MCVFOCVBMSU4QyVFNCVCOCU4MCVFNCVCOCVBQSVFOCVBRSVBMSVFOSU5OCU4NSVFOSU5MyVCRSVFNiU4RSVBNSVFNSU4RCVCMyVFNSU4RiVBRiVFRiVCQyU4OSVFRiVCQyU5QQpodHRwcyUzQSUyRiUyRnN1Yi54Zi5mcmVlLmhyJTJGYXV0bw=='))}"
-							id="content">${content}</textarea>
-						<div class="save-container">
-							<button class="save-btn" onclick="saveContent(this)">保存</button>
-							<span class="save-status" id="saveStatus"></span>
+					<div class="container">
+						<div class="header">
+							<h1>🚀 ${FileName}</h1>
+							<p>现代化的订阅管理系统</p>
 						</div>
-						` : '<p>请绑定 <strong>变量名称</strong> 为 <strong>KV</strong> 的KV命名空间</p>'}
+
+						<div class="glass-card">
+							<div class="section-title">📱 订阅地址</div>
+							<p style="color: rgba(255,255,255,0.7); margin-bottom: 24px; font-size: 14px;">点击复制按钮即可复制订阅链接并生成二维码</p>
+							
+							<div class="sub-item" style="--index: 0;">
+								<div class="sub-label">自适应订阅</div>
+								<div class="sub-link">
+									<a href="javascript:void(0)">https://${url.hostname}/${mytoken}</a>
+									<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/${mytoken}','qr0')">📋 复制</button>
+								</div>
+								<div id="qr0"></div>
+							</div>
+
+							<div class="sub-item" style="--index: 1;">
+								<div class="sub-label">Base64 订阅</div>
+								<div class="sub-link">
+									<a href="javascript:void(0)">https://${url.hostname}/${mytoken}?b64</a>
+									<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?b64','qr1')">📋 复制</button>
+								</div>
+								<div id="qr1"></div>
+							</div>
+
+							<div class="sub-item" style="--index: 2;">
+								<div class="sub-label">Clash 订阅</div>
+								<div class="sub-link">
+									<a href="javascript:void(0)">https://${url.hostname}/${mytoken}?clash</a>
+									<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?clash','qr2')">📋 复制</button>
+								</div>
+								<div id="qr2"></div>
+							</div>
+
+							<div class="sub-item" style="--index: 3;">
+								<div class="sub-label">Sing-box 订阅</div>
+								<div class="sub-link">
+									<a href="javascript:void(0)">https://${url.hostname}/${mytoken}?sb</a>
+									<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?sb','qr3')">📋 复制</button>
+								</div>
+								<div id="qr3"></div>
+							</div>
+
+							<div class="sub-item" style="--index: 4;">
+								<div class="sub-label">Surge 订阅</div>
+								<div class="sub-link">
+									<a href="javascript:void(0)">https://${url.hostname}/${mytoken}?surge</a>
+									<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?surge','qr4')">📋 复制</button>
+								</div>
+								<div id="qr4"></div>
+							</div>
+
+							<div class="sub-item" style="--index: 5;">
+								<div class="sub-label">Loon 订阅</div>
+								<div class="sub-link">
+									<a href="javascript:void(0)">https://${url.hostname}/${mytoken}?loon</a>
+									<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?loon','qr5')">📋 复制</button>
+								</div>
+								<div id="qr5"></div>
+							</div>
+
+							<div class="collapsible">
+								<div class="collapse-toggle" onclick="toggleGuest()">
+									<span id="toggleIcon">▶</span>
+									<span>查看访客订阅</span>
+								</div>
+								<div id="guestContent" style="display: none;">
+									<div class="collapse-content">
+										<div class="warning">访客订阅仅可使用订阅功能，无法查看配置页面</div>
+										<div class="info-box">
+											<p><strong>访客 TOKEN：</strong>${guest}</p>
+										</div>
+
+										<div class="sub-item" style="--index: 6;">
+											<div class="sub-label">自适应订阅</div>
+											<div class="sub-link">
+												<a href="javascript:void(0)">https://${url.hostname}/sub?token=${guest}</a>
+												<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}','gqr0')">📋 复制</button>
+											</div>
+											<div id="gqr0"></div>
+										</div>
+
+										<div class="sub-item" style="--index: 7;">
+											<div class="sub-label">Base64 订阅</div>
+											<div class="sub-link">
+												<a href="javascript:void(0)">https://${url.hostname}/sub?token=${guest}&b64</a>
+												<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&b64','gqr1')">📋 复制</button>
+											</div>
+											<div id="gqr1"></div>
+										</div>
+
+										<div class="sub-item" style="--index: 8;">
+											<div class="sub-label">Clash 订阅</div>
+											<div class="sub-link">
+												<a href="javascript:void(0)">https://${url.hostname}/sub?token=${guest}&clash</a>
+												<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&clash','gqr2')">📋 复制</button>
+											</div>
+											<div id="gqr2"></div>
+										</div>
+
+										<div class="sub-item" style="--index: 9;">
+											<div class="sub-label">Sing-box 订阅</div>
+											<div class="sub-link">
+												<a href="javascript:void(0)">https://${url.hostname}/sub?token=${guest}&sb</a>
+												<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&sb','gqr3')">📋 复制</button>
+											</div>
+											<div id="gqr3"></div>
+										</div>
+
+										<div class="sub-item" style="--index: 10;">
+											<div class="sub-label">Surge 订阅</div>
+											<div class="sub-link">
+												<a href="javascript:void(0)">https://${url.hostname}/sub?token=${guest}&surge</a>
+												<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&surge','gqr4')">📋 复制</button>
+											</div>
+											<div id="gqr4"></div>
+										</div>
+
+										<div class="sub-item" style="--index: 11;">
+											<div class="sub-label">Loon 订阅</div>
+											<div class="sub-link">
+												<a href="javascript:void(0)">https://${url.hostname}/sub?token=${guest}&loon</a>
+												<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&loon','gqr5')">📋 复制</button>
+											</div>
+											<div id="gqr5"></div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="glass-card">
+							<div class="section-title">⚙️ 订阅转换配置</div>
+							<div class="info-box">
+								<p><strong>订阅转换后端：</strong>${subProtocol}://${subConverter}</p>
+								<p><strong>配置文件：</strong>${subConfig}</p>
+							</div>
+						</div>
+
+						<div class="glass-card">
+							<div class="section-title">📝 订阅内容编辑</div>
+							${hasKV ? `
+								<textarea class="editor" id="content" placeholder="在此输入订阅链接或节点信息...
+
+支持格式：
+- 订阅链接（一行一条）
+- 节点链接（vmess://、vless://、trojan:// 等）
+- 留空则使用默认配置">${content}</textarea>
+								<div class="save-container">
+									<button class="btn btn-primary" onclick="saveContent(this)">💾 保存配置</button>
+									<span class="save-status" id="saveStatus"></span>
+								</div>
+							` : `
+								<div class="warning">
+									请先绑定名为 <strong>KV</strong> 的 KV 命名空间才能使用编辑功能
+								</div>
+							`}
+						</div>
 					</div>
+
 					<script>
-					function copyToClipboard(text, qrcode) {
+					function copyToClipboard(text, qrId) {
 						navigator.clipboard.writeText(text).then(() => {
-							alert('已复制到剪贴板');
+							// 显示复制成功提示
+							const btn = event.target;
+							const originalText = btn.innerHTML;
+							btn.innerHTML = '✓ 已复制';
+							btn.classList.add('btn-success');
+							
+							setTimeout(() => {
+								btn.innerHTML = originalText;
+								btn.classList.remove('btn-success');
+								btn.classList.add('btn-copy');
+							}, 2000);
+							
+							// 生成二维码
+							const qrDiv = document.getElementById(qrId);
+							qrDiv.innerHTML = '';
+							const wrapper = document.createElement('div');
+							wrapper.className = 'qrcode-wrapper';
+							qrDiv.appendChild(wrapper);
+							
+							new QRCode(wrapper, {
+								text: text,
+								width: 200,
+								height: 200,
+								colorDark: "#000000",
+								colorLight: "#ffffff",
+								correctLevel: QRCode.CorrectLevel.M
+							});
 						}).catch(err => {
+							alert('复制失败，请手动复制');
 							console.error('复制失败:', err);
 						});
-						const qrcodeDiv = document.getElementById(qrcode);
-						qrcodeDiv.innerHTML = '';
-						new QRCode(qrcodeDiv, {
-							text: text,
-							width: 220,
-							height: 220,
-							colorDark: "#000000",
-							colorLight: "#ffffff",
-							correctLevel: QRCode.CorrectLevel.Q,
-							scale: 1
-						});
-					}
-						
-					if (document.querySelector('.editor')) {
-						let timer;
-						const textarea = document.getElementById('content');
-						const originalContent = textarea.value;
-		
-						function goBack() {
-							const currentUrl = window.location.href;
-							const parentUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
-							window.location.href = parentUrl;
-						}
-		
-						function replaceFullwidthColon() {
-							const text = textarea.value;
-							textarea.value = text.replace(/：/g, ':');
-						}
-						
-						function saveContent(button) {
-							try {
-								const updateButtonText = (step) => {
-									button.textContent = \`保存中: \${step}\`;
-								};
-								const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-								
-								if (!isIOS) {
-									replaceFullwidthColon();
-								}
-								updateButtonText('开始保存');
-								button.disabled = true;
-
-								const textarea = document.getElementById('content');
-								if (!textarea) {
-									throw new Error('找不到文本编辑区域');
-								}
-
-								updateButtonText('获取内容');
-								let newContent;
-								let originalContent;
-								try {
-									newContent = textarea.value || '';
-									originalContent = textarea.defaultValue || '';
-								} catch (e) {
-									console.error('获取内容错误:', e);
-									throw new Error('无法获取编辑内容');
-								}
-
-								updateButtonText('准备状态更新函数');
-								const updateStatus = (message, isError = false) => {
-									const statusElem = document.getElementById('saveStatus');
-									if (statusElem) {
-										statusElem.textContent = message;
-										statusElem.style.color = isError ? 'red' : '#666';
-									}
-								};
-
-								updateButtonText('准备按钮重置函数');
-								const resetButton = () => {
-									button.textContent = '保存';
-									button.disabled = false;
-								};
-
-								if (newContent !== originalContent) {
-									updateButtonText('发送保存请求');
-									fetch(window.location.href, {
-										method: 'POST',
-										body: newContent,
-										headers: {
-											'Content-Type': 'text/plain;charset=UTF-8'
-										},
-										cache: 'no-cache'
-									})
-									.then(response => {
-										updateButtonText('检查响应状态');
-										if (!response.ok) {
-											throw new Error(\`HTTP error! status: \${response.status}\`);
-										}
-										updateButtonText('更新保存状态');
-										const now = new Date().toLocaleString();
-										document.title = \`编辑已保存 \${now}\`;
-										updateStatus(\`已保存 \${now}\`);
-									})
-									.catch(error => {
-										updateButtonText('处理错误');
-										console.error('Save error:', error);
-										updateStatus(\`保存失败: \${error.message}\`, true);
-									})
-									.finally(() => {
-										resetButton();
-									});
-								} else {
-									updateButtonText('检查内容变化');
-									updateStatus('内容未变化');
-									resetButton();
-								}
-							} catch (error) {
-								console.error('保存过程出错:', error);
-								button.textContent = '保存';
-								button.disabled = false;
-								const statusElem = document.getElementById('saveStatus');
-								if (statusElem) {
-									statusElem.textContent = \`错误: \${error.message}\`;
-									statusElem.style.color = 'red';
-								}
-							}
-						}
-		
-						textarea.addEventListener('blur', saveContent);
-						textarea.addEventListener('input', () => {
-							clearTimeout(timer);
-							timer = setTimeout(saveContent, 5000);
-						});
 					}
 
-					function toggleNotice() {
-						const noticeContent = document.getElementById('noticeContent');
-						const noticeToggle = document.getElementById('noticeToggle');
-						if (noticeContent.style.display === 'none' || noticeContent.style.display === '') {
-							noticeContent.style.display = 'block';
-							noticeToggle.textContent = '隐藏访客订阅∧';
+					function toggleGuest() {
+						const content = document.getElementById('guestContent');
+						const icon = document.getElementById('toggleIcon');
+						
+						if (content.style.display === 'none') {
+							content.style.display = 'block';
+							icon.textContent = '▼';
 						} else {
-							noticeContent.style.display = 'none';
-							noticeToggle.textContent = '查看访客订阅∨';
+							content.style.display = 'none';
+							icon.textContent = '▶';
 						}
 					}
-			
-					document.addEventListener('DOMContentLoaded', () => {
-						document.getElementById('noticeContent').style.display = 'none';
+
+					${hasKV ? `
+					let saveTimer;
+					const textarea = document.getElementById('content');
+					
+					function saveContent(button) {
+						const updateButtonText = (text) => {
+							button.innerHTML = text;
+						};
+						
+						const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+						
+						if (!isIOS) {
+							textarea.value = textarea.value.replace(/：/g, ':');
+						}
+						
+						updateButtonText('💾 保存中...');
+						button.disabled = true;
+						button.classList.add('loading');
+
+						const newContent = textarea.value || '';
+						const originalContent = textarea.defaultValue || '';
+
+						const updateStatus = (message, isError = false) => {
+							const statusElem = document.getElementById('saveStatus');
+							if (statusElem) {
+								statusElem.textContent = message;
+								statusElem.style.color = isError ? '#FF3B30' : '#34C759';
+							}
+						};
+
+						const resetButton = () => {
+							button.innerHTML = '💾 保存配置';
+							button.disabled = false;
+							button.classList.remove('loading');
+						};
+
+						if (newContent !== originalContent) {
+							fetch(window.location.href, {
+								method: 'POST',
+								body: newContent,
+								headers: {
+									'Content-Type': 'text/plain;charset=UTF-8'
+								}
+							})
+							.then(response => {
+								if (!response.ok) {
+									throw new Error(\`HTTP error! status: \${response.status}\`);
+								}
+								const now = new Date().toLocaleString('zh-CN');
+								document.title = \`✅ 已保存 - \${now}\`;
+								updateStatus(\`✅ 保存成功 \${now}\`);
+								textarea.defaultValue = newContent;
+							})
+							.catch(error => {
+								console.error('Save error:', error);
+								updateStatus(\`❌ 保存失败: \${error.message}\`, true);
+							})
+							.finally(() => {
+								resetButton();
+							});
+						} else {
+							updateStatus('ℹ️ 内容未更改');
+							resetButton();
+						}
+					}
+
+					textarea.addEventListener('input', () => {
+						clearTimeout(saveTimer);
+						saveTimer = setTimeout(() => {
+							const btn = document.querySelector('.btn-primary');
+							if (btn) saveContent(btn);
+						}, 3000);
 					});
+					` : ''}
 					</script>
 				</body>
 			</html>
