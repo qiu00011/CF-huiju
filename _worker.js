@@ -483,718 +483,458 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 		}
 
 		const html = `
-			<!DOCTYPE html>
-			<html lang="zh-CN">
-				<head>
-					<title>${FileName} 订阅管理</title>
-					<meta charset="utf-8">
-					<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-					<style>
-						* {
-							margin: 0;
-							padding: 0;
-							box-sizing: border-box;
-						}
-						
-						:root {
-							--primary-color: #3B82F6;
-							--success-color: #10B981;
-							--warning-color: #F59E0B;
-							--danger-color: #EF4444;
-						}
-						
-						body {
-							font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-							background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 50%, #1a202c 100%);
-							min-height: 100vh;
-							padding: 20px;
-							overflow-x: hidden;
-						}
-						
-						/* 柔和的背景光晕 */
-						body::before {
-							content: '';
-							position: fixed;
-							top: -50%;
-							left: -50%;
-							width: 200%;
-							height: 200%;
-							background: 
-								radial-gradient(circle at 30% 40%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
-								radial-gradient(circle at 70% 60%, rgba(99, 102, 241, 0.06) 0%, transparent 40%),
-								radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
-							animation: gentleFloat 20s ease-in-out infinite;
-							pointer-events: none;
-							z-index: 0;
-						}
-						
-						@keyframes gentleFloat {
-							0%, 100% { transform: translate(0, 0) scale(1); }
-							33% { transform: translate(-20px, 20px) scale(1.05); }
-							66% { transform: translate(20px, -20px) scale(0.95); }
-						}
-						
-						.container {
-							max-width: 1000px;
-							margin: 0 auto;
-							position: relative;
-							z-index: 1;
-						}
-						
-						/* 玻璃态卡片 - 更柔和 */
-						.glass-card {
-							background: rgba(30, 41, 59, 0.6);
-							backdrop-filter: blur(20px) saturate(180%);
-							-webkit-backdrop-filter: blur(20px) saturate(180%);
-							border-radius: 24px;
-							border: 1px solid rgba(148, 163, 184, 0.1);
-							box-shadow: 
-								0 8px 32px 0 rgba(0, 0, 0, 0.2),
-								inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
-							padding: 32px;
-							margin-bottom: 24px;
-							animation: fadeInUp 0.6s ease-out;
-						}
-						
-						@keyframes fadeInUp {
-							from {
-								opacity: 0;
-								transform: translateY(30px);
-							}
-							to {
-								opacity: 1;
-								transform: translateY(0);
-							}
-						}
-						
-						.header {
-							text-align: center;
-							margin-bottom: 40px;
-							animation: fadeInUp 0.6s ease-out 0.1s both;
-						}
-						
-						.header h1 {
-							font-size: 42px;
-							font-weight: 700;
-							background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-							-webkit-background-clip: text;
-							-webkit-text-fill-color: transparent;
-							background-clip: text;
-							margin-bottom: 12px;
-							letter-spacing: -0.5px;
-						}
-						
-						.header p {
-							color: #94a3b8;
-							font-size: 16px;
-							font-weight: 400;
-						}
-						
-						.section-title {
-							font-size: 22px;
-							font-weight: 600;
-							color: #e2e8f0;
-							margin-bottom: 20px;
-							display: flex;
-							align-items: center;
-							gap: 10px;
-						}
-						
-						.section-title::before {
-							content: '';
-							width: 4px;
-							height: 24px;
-							background: linear-gradient(180deg, #3B82F6 0%, #2563EB 100%);
-							border-radius: 2px;
-						}
-						
-						/* 订阅链接卡片 */
-						.sub-item {
-							background: rgba(51, 65, 85, 0.4);
-							backdrop-filter: blur(10px);
-							border-radius: 16px;
-							padding: 20px;
-							margin-bottom: 16px;
-							border: 1px solid rgba(148, 163, 184, 0.08);
-							transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-							animation: fadeInUp 0.6s ease-out calc(var(--index) * 0.05s) both;
-						}
-						
-						.sub-item:hover {
-							transform: translateY(-4px);
-							background: rgba(51, 65, 85, 0.6);
-							box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
-						}
-						
-						.sub-label {
-							font-size: 14px;
-							font-weight: 600;
-							color: #cbd5e1;
-							margin-bottom: 8px;
-							display: flex;
-							align-items: center;
-							gap: 8px;
-						}
-						
-						.sub-label::before {
-							content: '●';
-							color: #10B981;
-							font-size: 12px;
-						}
-						
-						.sub-link {
-							display: flex;
-							align-items: center;
-							gap: 12px;
-							background: rgba(15, 23, 42, 0.5);
-							padding: 12px 16px;
-							border-radius: 12px;
-							border: 1px solid rgba(148, 163, 184, 0.06);
-							margin-bottom: 12px;
-						}
-						
-						.sub-link a {
-							flex: 1;
-							color: #94a3b8;
-							text-decoration: none;
-							font-size: 13px;
-							word-break: break-all;
-							font-family: 'SF Mono', Monaco, monospace;
-							transition: color 0.2s;
-						}
-						
-						.sub-link a:hover {
-							color: #cbd5e1;
-						}
-						
-						/* 现代按钮 */
-						.btn {
-							padding: 10px 20px;
-							border-radius: 12px;
-							border: none;
-							font-size: 14px;
-							font-weight: 600;
-							cursor: pointer;
-							transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-							backdrop-filter: blur(10px);
-							position: relative;
-							overflow: hidden;
-						}
-						
-						.btn::before {
-							content: '';
-							position: absolute;
-							top: 50%;
-							left: 50%;
-							width: 0;
-							height: 0;
-							border-radius: 50%;
-							background: rgba(255, 255, 255, 0.15);
-							transform: translate(-50%, -50%);
-							transition: width 0.6s, height 0.6s;
-						}
-						
-						.btn:active::before {
-							width: 300px;
-							height: 300px;
-						}
-						
-						.btn-primary {
-							background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-							color: white;
-							box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-						}
-						
-						.btn-primary:hover {
-							transform: translateY(-2px);
-							box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-						}
-						
-						.btn-copy {
-							background: rgba(71, 85, 105, 0.6);
-							color: #e2e8f0;
-							padding: 8px 16px;
-							font-size: 13px;
-							flex-shrink: 0;
-							border: 1px solid rgba(148, 163, 184, 0.1);
-						}
-						
-						.btn-copy:hover {
-							background: rgba(71, 85, 105, 0.8);
-							transform: scale(1.05);
-						}
-						
-						.btn-success {
-							background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-							color: white;
-						}
-						
-						/* 二维码容器 */
-						.qrcode-wrapper {
-							margin-top: 12px;
-							padding: 16px;
-							background: white;
-							border-radius: 12px;
-							display: inline-block;
-							box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-						}
-						
-						/* 文本编辑器 */
-						.editor {
-							width: 100%;
-							min-height: 350px;
-							padding: 20px;
-							background: rgba(15, 23, 42, 0.6);
-							backdrop-filter: blur(10px);
-							border: 1px solid rgba(148, 163, 184, 0.1);
-							border-radius: 16px;
-							color: #cbd5e1;
-							font-size: 14px;
-							font-family: 'SF Mono', Monaco, Consolas, monospace;
-							line-height: 1.6;
-							resize: vertical;
-							transition: all 0.3s;
-						}
-						
-						.editor:focus {
-							outline: none;
-							border-color: rgba(59, 130, 246, 0.4);
-							box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
-							background: rgba(15, 23, 42, 0.8);
-						}
-						
-						.editor::placeholder {
-							color: #64748b;
-						}
-						
-						/* 信息框 */
-						.info-box {
-							background: rgba(59, 130, 246, 0.1);
-							border-left: 4px solid #3B82F6;
-							padding: 16px 20px;
-							border-radius: 12px;
-							margin: 16px 0;
-							backdrop-filter: blur(10px);
-						}
-						
-						.info-box p {
-							color: #cbd5e1;
-							margin: 6px 0;
-							font-size: 14px;
-						}
-						
-						.info-box strong {
-							color: #e2e8f0;
-							font-weight: 600;
-						}
-						
-						/* 保存状态 */
-						.save-container {
-							display: flex;
-							align-items: center;
-							gap: 16px;
-							margin-top: 16px;
-						}
-						
-						.save-status {
-							color: #94a3b8;
-							font-size: 14px;
-							font-weight: 500;
-						}
-						
-						/* 折叠区域 */
-						.collapsible {
-							margin-top: 24px;
-						}
-						
-						.collapse-toggle {
-							color: #3B82F6;
-							cursor: pointer;
-							font-weight: 600;
-							font-size: 15px;
-							display: inline-flex;
-							align-items: center;
-							gap: 8px;
-							padding: 10px 16px;
-							background: rgba(59, 130, 246, 0.1);
-							border-radius: 10px;
-							transition: all 0.3s;
-							border: 1px solid rgba(59, 130, 246, 0.15);
-						}
-						
-						.collapse-toggle:hover {
-							background: rgba(59, 130, 246, 0.15);
-							transform: translateX(4px);
-						}
-						
-						.collapse-content {
-							margin-top: 20px;
-							padding: 24px;
-							background: rgba(15, 23, 42, 0.4);
-							border-radius: 16px;
-							border: 1px solid rgba(148, 163, 184, 0.08);
-							animation: slideDown 0.3s ease-out;
-						}
-						
-						@keyframes slideDown {
-							from {
-								opacity: 0;
-								transform: translateY(-10px);
-							}
-							to {
-								opacity: 1;
-								transform: translateY(0);
-							}
-						}
-						
-						/* 警告提示 */
-						.warning {
-							color: #FCD34D;
-							font-weight: 600;
-							padding: 12px 16px;
-							background: rgba(245, 158, 11, 0.1);
-							border-radius: 10px;
-							border-left: 4px solid #F59E0B;
-							margin-bottom: 16px;
-							display: flex;
-							align-items: center;
-							gap: 10px;
-						}
-						
-						.warning::before {
-							content: '⚠️';
-							font-size: 18px;
-						}
-						
-						/* 响应式 */
-						@media (max-width: 768px) {
-							body {
-								padding: 12px;
-							}
-							
-							.glass-card {
-								padding: 20px;
-								border-radius: 20px;
-							}
-							
-							.header h1 {
-								font-size: 32px;
-							}
-							
-							.sub-link {
-								flex-direction: column;
-								align-items: stretch;
-							}
-							
-							.btn-copy {
-								width: 100%;
-							}
-						}
-						
-						/* 加载动画 */
-						@keyframes pulse {
-							0%, 100% {
-								opacity: 1;
-							}
-							50% {
-								opacity: 0.5;
-							}
-						}
-						
-						.loading {
-							animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-						}
-					</style>
-					<script src="https://cdn.jsdelivr.net/npm/@keeex/qrcodejs-kx@1.0.2/qrcode.min.js"></script>
-				</head>
-				<body>
-					<div class="container">
-						<div class="header">
-							<h1>🚀 ${FileName}</h1>
-							<p>现代化的订阅管理系统</p>
-						</div>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${FileName} 管理面板</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@keeex/qrcodejs-kx@1.0.2/qrcode.min.js"></script>
+  <style>
+    :root {
+      --primary: #007AFF;
+      --primary-hover: #0056b3;
+      --bg-color: #f5f5f7;
+      --card-bg: rgba(255, 255, 255, 0.65);
+      --card-border: rgba(255, 255, 255, 0.4);
+      --text-main: #1d1d1f;
+      --text-sub: #86868b;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      --radius: 20px;
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
 
-						<div class="glass-card">
-							<div class="section-title">📱 订阅地址</div>
-							<p style="color: #94a3b8; margin-bottom: 24px; font-size: 14px;">点击复制按钮即可复制订阅链接并生成二维码</p>
-							
-							<div class="sub-item" style="--index: 0;">
-								<div class="sub-label">自适应订阅</div>
-								<div class="sub-link">
-									<a href="javascript:void(0)">https://${url.hostname}/${mytoken}</a>
-									<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/${mytoken}','qr0')">📋 复制</button>
-								</div>
-								<div id="qr0"></div>
-							</div>
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #000000;
+        --card-bg: rgba(28, 28, 30, 0.65);
+        --card-border: rgba(255, 255, 255, 0.1);
+        --text-main: #f5f5f7;
+        --text-sub: #86868b;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      }
+    }
 
-							<div class="sub-item" style="--index: 1;">
-								<div class="sub-label">Base64 订阅</div>
-								<div class="sub-link">
-									<a href="javascript:void(0)">https://${url.hostname}/${mytoken}?b64</a>
-									<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?b64','qr1')">📋 复制</button>
-								</div>
-								<div id="qr1"></div>
-							</div>
+    * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      transition: var(--transition);
+      position: relative;
+      overflow-x: hidden;
+    }
 
-							<div class="sub-item" style="--index: 2;">
-								<div class="sub-label">Clash 订阅</div>
-								<div class="sub-link">
-									<a href="javascript:void(0)">https://${url.hostname}/${mytoken}?clash</a>
-									<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?clash','qr2')">📋 复制</button>
-								</div>
-								<div id="qr2"></div>
-							</div>
+    /* 动态背景层 */
+    #bg-container {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -2;
+      transition: opacity 0.5s ease;
+      background-size: cover;
+      background-position: center;
+    }
+    #bg-container video {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    
+    /* 背景遮罩，保证文字可读性 */
+    .overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -1;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(var(--bg-color), 0.3);
+      transition: var(--transition);
+    }
 
-							<div class="sub-item" style="--index: 3;">
-								<div class="sub-label">Sing-box 订阅</div>
-								<div class="sub-link">
-									<a href="javascript:void(0)">https://${url.hostname}/${mytoken}?sb</a>
-									<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?sb','qr3')">📋 复制</button>
-								</div>
-								<div id="qr3"></div>
-							</div>
+    .main-container {
+      width: 100%;
+      max-width: 800px;
+      z-index: 1;
+    }
 
-							<div class="sub-item" style="--index: 4;">
-								<div class="sub-label">Surge 订阅</div>
-								<div class="sub-link">
-									<a href="javascript:void(0)">https://${url.hostname}/${mytoken}?surge</a>
-									<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?surge','qr4')">📋 复制</button>
-								</div>
-								<div id="qr4"></div>
-							</div>
+    /* 标题区域 */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeInDown 0.8s ease;
+    }
+    .header h1 {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, var(--text-main) 0%, var(--text-sub) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header p {
+      font-size: 16px;
+      color: var(--text-sub);
+    }
 
-							<div class="sub-item" style="--index: 5;">
-								<div class="sub-label">Loon 订阅</div>
-								<div class="sub-link">
-									<a href="javascript:void(0)">https://${url.hostname}/${mytoken}?loon</a>
-									<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?loon','qr5')">📋 复制</button>
-								</div>
-								<div id="qr5"></div>
-							</div>
+    /* 卡片通用样式 */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(50px);
+      -webkit-backdrop-filter: blur(50px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 30px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      animation: fadeInUp 0.8s ease backwards;
+      transition: var(--transition);
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
 
-							<div class="collapsible">
-								<div class="collapse-toggle" onclick="toggleGuest()">
-									<span id="toggleIcon">▶</span>
-									<span>查看访客订阅</span>
-								</div>
-								<div id="guestContent" style="display: none;">
-									<div class="collapse-content">
-										<div class="warning">访客订阅仅可使用订阅功能，无法查看配置页面</div>
-										<div class="info-box">
-											<p><strong>访客 TOKEN：</strong>${guest}</p>
-										</div>
+    .card-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-title::before {
+      content: ''; display: block; width: 4px; height: 18px;
+      background: var(--primary); border-radius: 2px;
+    }
 
-										<div class="sub-item" style="--index: 6;">
-											<div class="sub-label">自适应订阅</div>
-											<div class="sub-link">
-												<a href="javascript:void(0)">https://${url.hostname}/sub?token=${guest}</a>
-												<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}','gqr0')">📋 复制</button>
-											</div>
-											<div id="gqr0"></div>
-										</div>
+    /* 输入框组 */
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .input-field {
+      flex: 1;
+      background: rgba(128,128,128, 0.1);
+      border: none;
+      padding: 12px 16px;
+      border-radius: 12px;
+      color: var(--text-main);
+      font-size: 14px;
+      transition: var(--transition);
+    }
+    .input-field:focus {
+      background: rgba(128,128,128, 0.15);
+      box-shadow: 0 0 0 2px var(--primary);
+    }
 
-										<div class="sub-item" style="--index: 7;">
-											<div class="sub-label">Base64 订阅</div>
-											<div class="sub-link">
-												<a href="javascript:void(0)">https://${url.hostname}/sub?token=${guest}&b64</a>
-												<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&b64','gqr1')">📋 复制</button>
-											</div>
-											<div id="gqr1"></div>
-										</div>
+    /* 按钮样式 */
+    .btn {
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: center;
+    }
+    .btn:active { transform: scale(0.96); }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+    
+    .btn-secondary {
+      background: rgba(128,128,128, 0.1);
+      color: var(--text-main);
+    }
+    .btn-secondary:hover { background: rgba(128,128,128, 0.2); }
 
-										<div class="sub-item" style="--index: 8;">
-											<div class="sub-label">Clash 订阅</div>
-											<div class="sub-link">
-												<a href="javascript:void(0)">https://${url.hostname}/sub?token=${guest}&clash</a>
-												<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&clash','gqr2')">📋 复制</button>
-											</div>
-											<div id="gqr2"></div>
-										</div>
+    /* 链接列表 */
+    .link-item {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border: 1px solid rgba(128,128,128, 0.1);
+    }
+    .link-label { font-size: 13px; font-weight: 600; color: var(--text-sub); }
+    .link-url {
+      font-family: 'SF Mono', monospace;
+      font-size: 13px;
+      color: var(--text-main);
+      word-break: break-all;
+      background: rgba(0,0,0,0.05);
+      padding: 8px;
+      border-radius: 8px;
+    }
+    .link-actions { display: flex; justify-content: flex-end; }
 
-										<div class="sub-item" style="--index: 9;">
-											<div class="sub-label">Sing-box 订阅</div>
-											<div class="sub-link">
-												<a href="javascript:void(0)">https://${url.hostname}/sub?token=${guest}&sb</a>
-												<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&sb','gqr3')">📋 复制</button>
-											</div>
-											<div id="gqr3"></div>
-										</div>
+    /* 二维码容器 */
+    .qr-container {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      background: white;
+      padding: 10px;
+      border-radius: 12px;
+      width: fit-content;
+      margin-left: auto;
+    }
 
-										<div class="sub-item" style="--index: 10;">
-											<div class="sub-label">Surge 订阅</div>
-											<div class="sub-link">
-												<a href="javascript:void(0)">https://${url.hostname}/sub?token=${guest}&surge</a>
-												<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&surge','gqr4')">📋 复制</button>
-											</div>
-											<div id="gqr4"></div>
-										</div>
+    /* 编辑器 */
+    .editor {
+      width: 100%;
+      min-height: 400px;
+      background: rgba(20, 20, 25, 0.8);
+      color: #e0e0e0;
+      border-radius: 16px;
+      padding: 20px;
+      font-family: 'SF Mono', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      border: 1px solid rgba(255,255,255,0.1);
+      resize: vertical;
+    }
+    .editor:focus { border-color: var(--primary); }
 
-										<div class="sub-item" style="--index: 11;">
-											<div class="sub-label">Loon 订阅</div>
-											<div class="sub-link">
-												<a href="javascript:void(0)">https://${url.hostname}/sub?token=${guest}&loon</a>
-												<button class="btn btn-copy" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&loon','gqr5')">📋 复制</button>
-											</div>
-											<div id="gqr5"></div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
+    /* Toast 通知 */
+    .toast {
+      position: fixed;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      z-index: 100;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-						<div class="glass-card">
-							<div class="section-title">⚙️ 订阅转换配置</div>
-							<div class="info-box">
-								<p><strong>订阅转换后端：</strong>${subProtocol}://${subConverter}</p>
-								<p><strong>配置文件：</strong>${subConfig}</p>
-							</div>
-						</div>
+    /* 访客订阅折叠 */
+    .guest-toggle {
+      width: 100%;
+      text-align: left;
+      padding: 15px;
+      background: rgba(128,128,128,0.05);
+      border-radius: 12px;
+      margin-top: 10px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-						<div class="glass-card">
-							<div class="section-title">📝 订阅内容编辑</div>
-							${hasKV ? `
-								<textarea class="editor" id="content" placeholder="在此输入订阅链接或节点信息...
+    /* 动画 */
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-支持格式：
-- 订阅链接（一行一条）
-- 节点链接（vmess://、vless://、trojan:// 等）
-- 留空则使用默认配置">${content}</textarea>
-								<div class="save-container">
-									<button class="btn btn-primary" onclick="saveContent(this)">💾 保存配置</button>
-									<span class="save-status" id="saveStatus"></span>
-								</div>
-							` : `
-								<div class="warning">
-									请先绑定名为 <strong>KV</strong> 的 KV 命名空间才能使用编辑功能
-								</div>
-							`}
-						</div>
-					</div>
+  </style>
+</head>
+<body>
 
-					<script>
-					function copyToClipboard(text, qrId) {
-						navigator.clipboard.writeText(text).then(() => {
-							const btn = event.target;
-							const originalText = btn.innerHTML;
-							btn.innerHTML = '✓ 已复制';
-							btn.classList.add('btn-success');
-							
-							setTimeout(() => {
-								btn.innerHTML = originalText;
-								btn.classList.remove('btn-success');
-								btn.classList.add('btn-copy');
-							}, 2000);
-							
-							const qrDiv = document.getElementById(qrId);
-							qrDiv.innerHTML = '';
-							const wrapper = document.createElement('div');
-							wrapper.className = 'qrcode-wrapper';
-							qrDiv.appendChild(wrapper);
-							
-							new QRCode(wrapper, {
-								text: text,
-								width: 200,
-								height: 200,
-								colorDark: "#000000",
-								colorLight: "#ffffff",
-								correctLevel: QRCode.CorrectLevel.M
-							});
-						}).catch(err => {
-							alert('复制失败，请手动复制');
-							console.error('复制失败:', err);
-						});
-					}
+  <!-- 背景容器 -->
+  <div id="bg-container"></div>
+  <div class="overlay"></div>
 
-					function toggleGuest() {
-						const content = document.getElementById('guestContent');
-						const icon = document.getElementById('toggleIcon');
-						
-						if (content.style.display === 'none') {
-							content.style.display = 'block';
-							icon.textContent = '▼';
-						} else {
-							content.style.display = 'none';
-							icon.textContent = '▶';
-						}
-					}
+  <!-- Toast -->
+  <div id="toast" class="toast"><span>✅</span> <span id="toast-msg">操作成功</span></div>
 
-					${hasKV ? `
-					let saveTimer;
-					const textarea = document.getElementById('content');
-					
-					function saveContent(button) {
-						const updateButtonText = (text) => {
-							button.innerHTML = text;
-						};
-						
-						const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-						
-						if (!isIOS) {
-							textarea.value = textarea.value.replace(/：/g, ':');
-						}
-						
-						updateButtonText('💾 保存中...');
-						button.disabled = true;
-						button.classList.add('loading');
+  <div class="main-container">
+    <div class="header">
+      <h1>${FileName}</h1>
+      <p>Cloudflare Workers 订阅管理中心</p>
+    </div>
 
-						const newContent = textarea.value || '';
-						const originalContent = textarea.defaultValue || '';
+    <!-- 个性化设置卡片 -->
+    <div class="card" style="animation-delay: 0.1s;">
+      <div class="card-title">🎨 个性化设置</div>
+      <div class="input-group">
+        <input type="text" id="bg-input" class="input-field" placeholder="输入图片或视频直链 (mp4/mov/webm)...">
+        <button class="btn btn-primary" onclick="saveBackground()">保存背景</button>
+      </div>
+      <p style="font-size: 12px; color: var(--text-sub);">支持 .mp4/.mov 视频自动静音循环播放，配置保存在本地浏览器。</p>
+    </div>
 
-						const updateStatus = (message, isError = false) => {
-							const statusElem = document.getElementById('saveStatus');
-							if (statusElem) {
-								statusElem.textContent = message;
-								statusElem.style.color = isError ? '#EF4444' : '#10B981';
-							}
-						};
+    <!-- 订阅管理卡片 -->
+    <div class="card" style="animation-delay: 0.2s;">
+      <div class="card-title">📡 订阅链接</div>
+      
+      ${generateLinkItem('自适应订阅', `https://${url.hostname}/${mytoken}`, 'sub1')}
+      ${generateLinkItem('Base64 订阅', `https://${url.hostname}/${mytoken}?b64`, 'sub2')}
+      ${generateLinkItem('Clash 订阅', `https://${url.hostname}/${mytoken}?clash`, 'sub3')}
+      ${generateLinkItem('Sing-box 订阅', `https://${url.hostname}/${mytoken}?sb`, 'sub4')}
+      
+      <div class="guest-section">
+        <div class="guest-toggle" onclick="toggleGuest()">
+          <span>👤 访客订阅 (Token: ${guest})</span>
+          <span id="guest-arrow">▼</span>
+        </div>
+        <div id="guest-links" style="display: none; margin-top: 15px; padding-left: 10px; border-left: 2px solid var(--primary);">
+           ${generateLinkItem('访客自适应', `https://${url.hostname}/sub?token=${guest}`, 'gsub1')}
+           ${generateLinkItem('访客 Clash', `https://${url.hostname}/sub?token=${guest}&clash`, 'gsub2')}
+        </div>
+      </div>
+    </div>
 
-						const resetButton = () => {
-							button.innerHTML = '💾 保存配置';
-							button.disabled = false;
-							button.classList.remove('loading');
-						};
+    <!-- 编辑器卡片 -->
+    <div class="card" style="animation-delay: 0.3s;">
+      <div class="card-title">📝 节点编辑</div>
+      ${hasKV ? `
+        <textarea id="editor" class="editor" placeholder="在此粘贴节点链接或订阅链接，一行一个...">${content}</textarea>
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+          <button class="btn btn-primary" onclick="saveContent()" id="save-btn">
+            <span>💾</span> 保存配置
+          </button>
+        </div>
+      ` : `
+        <div style="text-align: center; padding: 20px; color: var(--text-sub);">
+          ⚠️ 未绑定 KV 命名空间，无法使用在线编辑功能。<br>请在 CF 后台绑定名为 <b>KV</b> 的空间。
+        </div>
+      `}
+    </div>
 
-						if (newContent !== originalContent) {
-							fetch(window.location.href, {
-								method: 'POST',
-								body: newContent,
-								headers: {
-									'Content-Type': 'text/plain;charset=UTF-8'
-								}
-							})
-							.then(response => {
-								if (!response.ok) {
-									throw new Error(\`HTTP error! status: \${response.status}\`);
-								}
-								const now = new Date().toLocaleString('zh-CN');
-								document.title = \`✅ 已保存 - \${now}\`;
-								updateStatus(\`✅ 保存成功 \${now}\`);
-								textarea.defaultValue = newContent;
-							})
-							.catch(error => {
-								console.error('Save error:', error);
-								updateStatus(\`❌ 保存失败: \${error.message}\`, true);
-							})
-							.finally(() => {
-								resetButton();
-							});
-						} else {
-							updateStatus('ℹ️ 内容未更改');
-							resetButton();
-						}
-					}
+  </div>
 
-					textarea.addEventListener('input', () => {
-						clearTimeout(saveTimer);
-						saveTimer = setTimeout(() => {
-							const btn = document.querySelector('.btn-primary');
-							if (btn) saveContent(btn);
-						}, 3000);
-					});
-					` : ''}
-					</script>
-				</body>
-			</html>
+  <script>
+    // 初始化
+    window.onload = function() {
+      loadBackground();
+    }
+
+    // --- 背景功能逻辑 ---
+    function loadBackground() {
+      const bgUrl = localStorage.getItem('cf_worker_bg');
+      if (bgUrl) {
+        document.getElementById('bg-input').value = bgUrl;
+        applyBackground(bgUrl);
+      }
+    }
+
+    function saveBackground() {
+      const url = document.getElementById('bg-input').value.trim();
+      if (!url) {
+        localStorage.removeItem('cf_worker_bg');
+        applyBackground('');
+        showToast('背景已重置');
+        return;
+      }
+      localStorage.setItem('cf_worker_bg', url);
+      applyBackground(url);
+      showToast('背景已保存');
+    }
+
+    function applyBackground(url) {
+      const container = document.getElementById('bg-container');
+      container.innerHTML = ''; // 清空
+      
+      if (!url) return;
+
+      const ext = url.split('.').pop().toLowerCase().split('?')[0];
+      const videoExts = ['mp4', 'mov', 'webm'];
+
+      if (videoExts.includes(ext)) {
+        const video = document.createElement('video');
+        video.src = url;
+        video.autoplay = true;
+        video.loop = true;
+        video.muted = true;
+        video.playsInline = true;
+        // 确保视频加载
+        video.onloadeddata = () => video.play();
+        container.appendChild(video);
+      } else {
+        container.style.backgroundImage = \`url('\${url}')\`;
+      }
+    }
+
+    // --- 工具函数 ---
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toast-msg');
+      msg.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function copyText(text, id) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('复制成功');
+        const container = document.getElementById('qr-' + id);
+        container.innerHTML = '';
+        new QRCode(container, {
+          text: text,
+          width: 120,
+          height: 120
+        });
+      }).catch(() => showToast('复制失败', 'error'));
+    }
+
+    function toggleGuest() {
+      const el = document.getElementById('guest-links');
+      const arrow = document.getElementById('guest-arrow');
+      if (el.style.display === 'none') {
+        el.style.display = 'block';
+        arrow.innerText = '▲';
+      } else {
+        el.style.display = 'none';
+        arrow.innerText = '▼';
+      }
+    }
+
+    // --- KV 保存逻辑 ---
+    ${hasKV ? `
+    function saveContent() {
+      const btn = document.getElementById('save-btn');
+      const text = document.getElementById('editor').value;
+      
+      btn.innerHTML = '⏳ 保存中...';
+      btn.disabled = true;
+
+      fetch(window.location.href, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain'},
+        body: text
+      }).then(res => {
+        if (res.ok) {
+          showToast('✅ 配置保存成功');
+        } else {
+          showToast('❌ 保存失败', 'error');
+        }
+      }).catch(err => {
+        showToast('❌ 网络错误', 'error');
+      }).finally(() => {
+        btn.innerHTML = '<span>💾</span> 保存配置';
+        btn.disabled = false;
+      });
+    }
+    ` : ''}
+  </script>
+</body>
+</html>
 		`;
 
 		return new Response(html, {
@@ -1207,4 +947,18 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 			headers: { "Content-Type": "text/plain;charset=utf-8" }
 		});
 	}
+}
+
+// 辅助函数：生成 HTML 列表项
+function generateLinkItem(label, url, id) {
+    return `
+    <div class="link-item">
+        <div class="link-label">${label}</div>
+        <div class="link-url">${url}</div>
+        <div class="link-actions">
+            <button class="btn btn-secondary" onclick="copyText('${url}', '${id}')">📋 复制链接 & 二维码</button>
+        </div>
+        <div id="qr-${id}" class="qr-container"></div>
+    </div>
+    `;
 }
